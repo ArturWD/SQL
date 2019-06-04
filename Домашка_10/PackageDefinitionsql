@@ -1,0 +1,99 @@
+create or replace package EquationSolver as
+    type EquationsArray
+    is table of Equations%ROWTYPE
+    index by binary_integer;
+    
+    procedure SolveEquation(equationIndex integer);
+    procedure SolveEquation(eqArray EquationsArray);
+end EquationSolver;
+
+create or replace package body EquationSolver as
+    type roots 
+    is record( x1 EquationsRoots.eq_root1%TYPE,
+                x2 x1%TYPE
+                );
+    function SolutionExists(equationIndex integer)
+    return boolean 
+    is
+        counter integer;
+    begin
+        select count(*)
+        into counter
+        from EquationsRoots
+        where eqindex = equationIndex;
+        
+        if counter = 1 then 
+            return true;
+        end if;
+        return false;
+    end SolutionExists;
+    function GetRoots(a number, b number, c number)
+    return roots
+    is
+        solution roots;
+    begin
+        solution.x1 := (-b + Sqrt( b**2 - 4*a*c) ) / (2*a);
+        solution.x2 := (-b - Sqrt( b**2 - 4*a*c) ) / (2*a);
+        return solution;
+    EXCEPTION
+        when others then
+            dbms_output.put_line('THIS EQUATION DOES NOT HAVE EITHER ONE OR TWO ROOTS');
+    end GetRoots;
+
+    procedure AddOrUpdateSolution(equationIndex integer, x1 number, x2 number) is
+    begin
+
+        --IF EQUATION HAS SOLUTION THEN UPDATE EXISTING SOLUTION
+        if  SolutionExists(equationIndex) then
+            update EquationsRoots
+            set eq_root1 = x1, eq_root2 = x2;
+            dbms_output.put_line('UPDaTING');
+        --IF EQUATION DOES NOT HAVE SOLUTION THEN CREATE IT
+        else
+            insert into EquationsRoots
+                values(equationIndex, x1, x2);
+            dbms_output.put_line('INSERTING');
+        end if;
+
+    end AddOrUpdateSolution;
+
+    procedure SolveEquation(eqArray EquationsArray)is
+        solution roots; 
+        arr_index binary_integer;
+    begin
+        arr_index := eqArray.first;
+        while arr_index is not null loop
+            
+            solution:= GetRoots(eqArray(arr_index).eq_a, eqArray(arr_index).eq_b, eqArray(arr_index).eq_c);
+            AddOrUpdateSolution(eqArray(arr_index).eqIndex, solution.x1, solution.x2);
+            
+            arr_index := eqArray.next(arr_index);
+        end loop;
+        
+    EXCEPTION
+        when others then
+            dbms_output.put_line('A LEAST ONE OF EQUATIONS IS NOT SOLVABLE');
+        
+    end SolveEquation;
+
+    procedure SolveEquation(equationIndex integer) is
+        a Equations.eq_a%TYPE;
+        b a%TYPE;
+        c a%TYPE;
+        solution roots; 
+    begin
+        select eq_a, eq_b, eq_c
+        into a, b, c
+        from Equations
+        where eqIndex = equationIndex;
+        solution:= GetRoots(a, b, c);
+        AddOrUpdateSolution(equationIndex, solution.x1, solution.x2);
+    exception
+        when no_data_found then
+            dbms_output.put_line('INDEX DOES NOT EXIST');
+        when others then
+            dbms_output.put_line('EQUATION WAS NOT SOLVED');
+    end SolveEquation; 
+
+    
+end EquationSolver;

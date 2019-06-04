@@ -1,0 +1,77 @@
+--1 A
+select last_name||' '||first_name FullName, salary Salary, to_char(NVL(commission_pct,0), '0.0') bonus, salary*(1+NVL(commission_pct,0)) "Salary+bonus"
+from employees
+order by last_name||' '||first_name;
+
+--1 B
+select department, salary, Full_Salary
+from (
+    select NVL(department_id, -1) department, avg(salary) salary, 
+    avg( salary*(1+NVL(commission_pct,0)) ) Full_Salary, SUM( salary*NVL(commission_pct,0) ) bonus
+    from employees
+    group by NVL(department_id, -1) 
+)  SAL 
+order by bonus desc;
+
+--1 B(absolute value of bonus is also displayed)
+select NVL(department_id, -1) department, avg(salary) salary, 
+    avg( salary*(1+NVL(commission_pct,0)) ) Full_Salary, SUM( salary*NVL(commission_pct,0) ) bonus
+    from employees
+    group by NVL(department_id, -1) 
+    order by bonus;
+
+
+--2
+select to_char(hire_date, 'MONTH') month, count(*) "employees"
+from employees
+group by to_char(hire_date, 'MONTH')
+order by "employees";
+
+--3
+select last_name||' '||first_name fullname, job_id, salary current_salary,
+    case job_id
+        when 'PROG_IT' then salary*1.1
+        when 'SH_CLERK' then salary*0.9
+        else salary
+    end new_salary
+from employees
+order by job_id, (case job_id
+                    when 'IT_PROG' then salary*1.1
+                    when 'SH_CLERK' then salary*0.9
+                    else salary
+                end) desc;
+--3 BONUS
+select max(  abs( salary - (case job_id
+                                when 'PROG_IT' then salary*1.1
+                                when 'SH_CLERK' then salary*0.9
+                                else salary
+                            end)
+            )  ) max_difference
+from employees;
+
+--4
+select manager_id, count(*)
+from employees
+group by manager_id;
+
+-- 4 BONUS 1
+select manager_id, count(*) subordinats, avg( trunc( (current_date - hire_date)/7, 0) ) "weeks experience"
+from employees
+group by manager_id;
+
+-- 4 BONUS 2
+select manager_id, count(*) subordinats, avg( trunc( (current_date - hire_date)/7, 0) ) "weeks experience"
+from employees
+where add_months(current_date, -12)< hire_date
+group by manager_id;
+
+--5
+select trunc(months_between(current_date , hire_date) /12) "experience (years)", count(*)
+from employees
+group by trunc(months_between(current_date , hire_date) /12)
+order by "стаж (лет)";
+
+
+
+
+

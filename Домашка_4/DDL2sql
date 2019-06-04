@@ -1,0 +1,41 @@
+
+create sequence s_payments ;
+
+create table agreement_payments(
+    agreement_id integer default s_payments.nextval primary key,
+    agreement_number varchar2(20),
+    pay_value number(10, 3)
+        constraint pay_value_ch check(pay_value >=0),
+    pay_date  date default current_date
+);
+create index payments_ind
+    on agreement_payments(pay_date, pay_value);
+
+insert into agreement_payments (agreement_number, pay_value)
+    values('11111111', 123);
+insert into agreement_payments (agreement_number, pay_value)
+    values('11111222', 89);
+insert into agreement_payments (agreement_number, pay_value)
+    values('11111333', 980);
+insert into agreement_payments (agreement_number, pay_value, pay_date)
+    values('11111444', 12, to_date('07.04.19', 'DD.MM.YY'));
+insert into agreement_payments (agreement_number, pay_value, pay_date)
+    values('11111555', 13.6, to_date('07.04.19', 'DD.MM.YY'));
+insert into agreement_payments (agreement_number, pay_value, pay_date)
+    values('11111666', 0.09, to_date('07.04.19', 'DD.MM.YY'));
+    
+select s_payments.currval from dual;
+create synonym ap for agreement_payments;
+
+create view total_payments as
+    select to_char(trunc(pay_date, 'DD'), 'DD.MM.YYYY') day, count(*)  payments_number, sum(pay_value) total_payment
+    from ap
+    group by trunc(pay_date, 'DD');
+
+select * from total_payments;
+
+   
+drop table agreement_payments;
+drop sequence s_payments;
+drop view total_payments;
+drop synonym ap;

@@ -1,0 +1,105 @@
+
+--FIRST TASK
+create table girls(
+    girl_id integer primary key,
+    girl varchar2(50),
+    toy_id integer
+);
+create table toys(
+    toy_id integer primary key,
+    toy varchar2(50)
+);
+
+
+
+insert into girls
+values(1, 'Dasha', 1);
+insert into girls
+values(2, 'Katya', 2);
+insert into girls
+values(3, 'Masha', 3);
+
+insert into toys
+values(1, 'Водяной пистолет');
+insert into toys
+values(2, 'Дудка');
+
+select girl, toy
+from girls left join toys
+on girls.toy_id = toys.toy_id;
+
+select girl, toy
+from girls, toys
+where girls.toy_id = toys.toy_id(+);
+
+drop table girls;
+drop table toys;
+
+--SECOND TASK
+create table girls(
+    girl_id integer primary key,
+    girl varchar2(50),
+    toy_id integer
+);
+create table toys(
+    toy_id integer primary key,
+    toy varchar2(50)
+);
+
+
+
+insert into girls
+    values(1, 'Женя', 1);
+insert into girls
+    values(2, 'Катя', 1);
+insert into girls
+    values(3, 'Саша', 3);
+insert into girls
+    values(4, 'Маргарита', 3);
+
+insert into toys
+    values(1, 'Водяной пистолет');
+insert into toys
+    values(2, 'Дудка');
+insert into toys
+    values(3, 'Кукла');
+
+select girl, toy
+from toys left join girls
+on girls.toy_id = toys.toy_id;
+
+select girl, toy
+from girls, toys
+where girls.toy_id(+) = toys.toy_id;
+
+drop table girls;
+drop table toys;
+
+
+--THIRD TASK
+create table emps(
+    emp_id integer primary key,
+    emp_full_name varchar(30),
+    emp_boss_id integer
+);
+
+insert into emps(emp_id, emp_full_name, emp_boss_id)
+    values(1, 'Шишкин', 3);
+insert into emps(emp_id, emp_full_name, emp_boss_id)
+    values(2, 'Ямочкин', 3);
+insert into emps(emp_id, emp_full_name, emp_boss_id)
+    values(3, 'Грибов', 6);
+insert into emps(emp_id, emp_full_name)
+    values(4, 'Борисов');
+insert into emps(emp_id, emp_full_name, emp_boss_id)
+    values(5, 'Вигин', 4);
+insert into emps(emp_id, emp_full_name, emp_boss_id)
+    values(6, 'Брюшкин', 4);
+insert into emps(emp_id, emp_full_name, emp_boss_id)
+    values(7, 'Пирожков', 5);
+    
+select sub.emp_full_name "Employee name", boss.emp_full_name "Boss name"
+from emps sub left join emps boss
+on sub.emp_boss_id = boss.emp_id;
+
+drop table emps;

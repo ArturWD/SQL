@@ -1,0 +1,34 @@
+
+create table Equations(
+    eqIndex integer not null unique,
+    eq_a number(10,3),
+    eq_b number(10,3),
+    eq_c number(10,3)
+);
+
+create table EquationsRoots(
+    eqIndex integer not null,
+    eq_root1 number(15,4),
+    eq_root2 number(15,4)
+);
+
+insert  into Equations (eqIndex, eq_a, eq_b, eq_c)
+    values(1, 1, 3, -4);
+
+insert  into Equations (eqIndex, eq_a, eq_b, eq_c)
+    values(2, 2, 3-0.5, 2.2);
+insert  into Equations (eqIndex, eq_a, eq_b, eq_c)
+    values(3, -3, 6, -18);
+insert  into Equations (eqIndex, eq_a, eq_b, eq_c)
+    values(4, 5, 0, -25);
+insert  into Equations (eqIndex, eq_a, eq_b, eq_c)
+    values(5, 2, 0, 0);
+insert  into Equations (eqIndex, eq_a, eq_b, eq_c)
+    values(6, 1, 1, -6);
+
+
+    
+
+
+drop table Equations;
+drop table EquationsRoots;

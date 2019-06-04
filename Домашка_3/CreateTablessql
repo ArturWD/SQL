@@ -1,0 +1,98 @@
+--Можно автоматически определять первичный ключ (но неудобно для тестирования)
+
+--create sequence schools_sq;
+--create sequence students_sq;
+
+create table DomRuSchools(
+    school_id integer /*DEFAULT schools_sq.nextval*/ primary key,
+    start_date date default current_date,
+    students integer,
+    is_finised smallint default 0  
+);
+create table DomRuStudents(
+    --это первичный ключ
+    student_id integer /*default students_sq.nextval*/
+        constraint st_student_id Primary Key,
+    --ученик должен иметь имя
+    first_name varchar2(20) 
+        constraint st_firstname_nn not null,
+    last_name varchar2(25),
+    -- одна колонка может иметь несколько ограничений
+    email varchar2(50) 
+        constraint st_email_uk unique
+        constraint st_email_nn not null,
+    -- можно создавать неименованные ограничения
+    rating integer default 0 check (rating between 0 and 100),
+    drop_me integer,
+    school_id integer,
+    --ограничения можно создавать отдельно от колонок
+    constraint st_school_fk foreign key (school_id) references DomRuSchools(school_id),
+    constraint st_lastname_nn check (last_name like '%') 
+);
+
+--позже можно добавлять именованные ограничения
+alter table DomRuSchools
+    add constraint ch_capacity_ch check(students between 1 and 60);
+    
+--именнованные ограничения можно удалять
+alter table DomRuStudents
+    drop constraint st_email_nn;
+ 
+ 
+--изменение полей
+alter table DomRuStudents
+    modify email varchar2(50) check(email like '%@%');
+    
+--удаление полей
+alter table DomRuStudents
+    drop column drop_me;
+    
+
+--добавление (нескольких) полей
+alter table DomRuStudents
+    add(phone varchar2(11) default '99999999999' not null,
+        address varchar2(50)
+    );
+
+--обавление данных в таблицы
+insert into domruschools ( students , is_finised, school_id)
+    values( 45, 1, 1);
+insert into domruschools ( students , is_finised, school_id)
+    values( 60, 1, 2);
+insert into domruschools ( students , is_finised, school_id)
+    values( 55, 0, 3);
+insert into domruschools ( students , is_finised, school_id)
+    values( 30, 1, 4);
+insert into domruschools ( students , is_finised, school_id)
+    values( 55, 0, 5);
+
+
+INSERT  INTO domrustudents (first_name, last_name, email, school_id, student_id) 
+    VALUES ('Artur', 'Shestakov', 'mail1@gg.com', 1, 1);
+INSERT  INTO domrustudents (first_name, last_name, email, school_id, student_id) 
+    VALUES ('John', 'Smith','mail2@gg.com', 2, 2);
+INSERT  INTO domrustudents (first_name, last_name, email, school_id, student_id) 
+    VALUES ('Barbara', 'Strange','mail3@gg.com', 3, 3);
+INSERT  INTO domrustudents (first_name, last_name, email, school_id, student_id) 
+    VALUES ('Doctor', 'Strange','mail4@gg.com', 1, 4);
+INSERT  INTO domrustudents (first_name, last_name, email, school_id, student_id) 
+    VALUES ('Driver', 'Bob','mail5@gg.com', 2, 5);
+INSERT  INTO domrustudents (first_name, last_name, email, school_id, student_id) 
+    VALUES ('Carl', 'Levis','mail6@gg.com', 3, 6);
+
+
+create table FullStudentInfo as
+    select first_name, last_name, rating, start_date
+    from domrustudents st inner join domruschools sc
+        on st.school_id = sc.school_id;
+
+select * from domrustudents;
+select * from domruschools;
+select * from fullstudentinfo;
+select first_name, last_name, rating, start_date
+from domrustudents st inner join domruschools sc
+    on st.school_id = sc.school_id;
+
+drop table DomRuStudents;
+drop table DomRuSchools;
+drop table fullstudentinfo;
